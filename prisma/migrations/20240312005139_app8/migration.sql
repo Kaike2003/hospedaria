@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `reservas` MODIFY `estado` ENUM('CONFIRMADA', 'PENDENTE', 'TERMINADA', 'CANCELADA') NOT NULL;

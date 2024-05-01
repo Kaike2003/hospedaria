@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Utilizador {
+  id                  String         @unique @default(uuid())
+  nome                String
+  email               String         @unique
+  telefone            Int            @unique
+  autenticado         Boolean        @default(false)
+  codigo_autenticacao String         @unique
+  palavraPasse        String
+  dataNascimento      DateTime
+  tipoUtilizador      tipoUtilizador
+
+  avaliacao Avaliacao[]
+  quarto    Quarto[]
+  reserva   Reserva[]
+
+  create_at DateTime @default(now())
+  update_at DateTime @updatedAt()
+
+  @@map("utilizadores")
+}
+
+model Avaliacao {
+  id       String @unique @default(uuid())
+  mensagem String
+
+  utilizadores Utilizador @relation(fields: [utilizadorId], references: [id])
+  utilizadorId String
+
+  create_at DateTime @default(now())
+  update_at DateTime @updatedAt()
+
+  @@map("avaliacoes")
+}
+
+model Quarto {
+  id              String     @unique @default(uuid())
+  nome            String
+  preco           Int
+  tipoQuarto      TipoQuarto
+  disponibilidade Boolean    @default(true)
+  descricao       String
+  publicado       Boolean    @default(false)
+  aprovado        Boolean    @default(false)
+
+  utilizador   Utilizador @relation(fields: [utilizadorId], references: [id])
+  utilizadorId String
+  reserva      Reserva[]
+
+  create_at DateTime @default(now())
+  update_at DateTime @updatedAt()
+
+  @@map("quartos")
+}
+
+model Reserva {
+  id          String   @unique @default(uuid())
+  dataEntrada DateTime
+  dataSaida   DateTime
+  valorTotal  Int
+
+  quarto       Quarto     @relation(fields: [quartoId], references: [id])
+  quartoId     String
+  utilizador   Utilizador @relation(fields: [utilizadorId], references: [id])
+  utilizadorId String
+  estado       TipoEstado
+
+  create_at DateTime @default(now())
+  update_at DateTime @updatedAt()
+
+  @@map("reservas")
+}
+
+enum TipoQuarto {
+  INDIVIDUAL
+  DUPLO
+  SUITE
+}
+
+enum TipoEstado {
+  CONFIRMADA
+  PENDENTE
+  TERMINADA
+  CANCELADA
+}
+
+enum tipoUtilizador {
+  ADMIN
+  CLIENTE
+}
